@@ -23,3 +23,6 @@ Visit [Heroku status site](https://status.heroku.com) for more details
 ## _[How to use? Documentation](https://github.com/souravkl11/raganork-md/wiki/Raganork-Documentation)_
 
 ## You can also use as a BGM bot. [Click here](https://github.com/souravkl11/raganork-md/wiki/Docs#how-to-set-up-bgm-bot)
+## follow me on instagram [follow](https://www.instagram.com/ag_toons/)
+## subscribe to my youtube channel [subscribe](https://www.youtube.com/channel/UCRIk9I95OZqP07CpQcEHbyw)
+## contact owner [Alien](https://wa.me/+2348100236360)
