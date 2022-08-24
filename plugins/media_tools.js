@@ -14,7 +14,6 @@ const {
   const {skbuffer} = require('raganork-bot');
   const {
       trim,
-      AVmix,
       trimVideo
   } = require('raganork-bot');
   const {
@@ -24,10 +23,11 @@ const {
       getString
   } = require('./misc/lang');
   const {
-      bass,
-      circle,
-      rotate,
-      findMusic 
+    avMix,  
+    bass,
+    circle,
+    rotate,
+    findMusic 
   } = require('./misc/misc');
   const Lang = getString('media');
   const fromMe = MODE == 'public' ? false : true
@@ -41,7 +41,7 @@ const {
       if (!message.reply_message || (!message.reply_message.video && !message.reply_message.audio)) return await message.sendReply(Lang.TRIM_NEED_REPLY);
       if (message.reply_message.audio) {
           if (match[1] === '' || !match[1].includes(",")) return await message.sendReply(Lang.TRIM_NEED);
-          var savedFile = await saveMessage(message.reply_message);
+          var savedFile = await message.reply_message.download();
           var trimmed = await trim(savedFile, match[1].split(",")[0], match[1].split(",")[1], './temp/trim.mp3');
           var result = fs.readFileSync('./temp/trim.mp3');
           await message.client.sendMessage(message.jid, {
@@ -54,9 +54,9 @@ const {
       }
       if (message.reply_message.video) {
           if (match[1] === '' || !match[1].includes(",")) return await message.sendReply(Lang.TRIM_VIDEO_NEED);
-          var savedFile = await saveMessage(message.reply_message);
+          var savedFile = await message.reply_message.download();
           trimVideo(savedFile, match[1].split(",")[0], match[1].split(",")[1], "./temp/trim.mp4", async function(video) {
-              return await message.sendMessage(video, 'video')
+              return await message.send(video, 'video')
           });
       }
   });
@@ -66,23 +66,21 @@ const {
     desc: "Audio to black video",
     use: 'edit'
 }, async (message, match) => {
-    if (!fs.existsSync("./temp/avmix")) {
-        fs.mkdirSync("./temp/avmix")
+    if (!fs.existsSync("./temp/black")) {
+        fs.mkdirSync("./temp/black")
     }
-    let files = fs.readdirSync("./temp/avmix/")
-    if (!message.reply_message || !message.reply_message.audio) return await message.sendMessage("_Need audio!_");
-    var savedFile = await saveMessage(message.reply_message);
-        await fs.writeFileSync('./temp/avmix/audio.mp3', fs.readFileSync(savedFile));
-        await fs.writeFileSync('./temp/avmix/video.mp4', await skbuffer("https://i.imgur.com/TsesS9x.mp4"));
+    let files = fs.readdirSync("./temp/black/")
+    if (!message.reply_message || !message.reply_message.audio) return await message.send("_Need audio!_");
+        var savedFile = await message.reply_message.download();
+        await fs.writeFileSync('./temp/black/audio.mp3', fs.readFileSync(savedFile));
+        await fs.writeFileSync('./temp/black/video.mp4', await skbuffer("https://i.imgur.com/TsesS9x.mp4"));
         await message.sendReply("_Processing..._")
-        
-    AVmix('./temp/avmix/video.mp4', './temp/avmix/audio.mp3', './temp/avmix/mixed.mp4', async function(video) {
-        await message.sendMessage(video, 'video');
-        await fs.unlinkSync('./temp/avmix/video.mp4');
-        await fs.unlinkSync('./temp/avmix/audio.mp3');
-        await fs.unlinkSync('./temp/avmix/mixed.mp4');
+        let video = await avMix('./temp/black/video.mp4','./temp/black/audio.mp3');
+        await message.send(video, 'video');
+        await fs.unlinkSync('./temp/black/video.mp4');
+        await fs.unlinkSync('./temp/black/audio.mp3');
+        await fs.unlinkSync('./merged.mp4');
         return;
-    });
 });
   Module({
       pattern: "avmix",
@@ -94,24 +92,25 @@ const {
           fs.mkdirSync("./temp/avmix")
       }
       let files = fs.readdirSync("./temp/avmix/")
-      if ((!message.reply_message && files.length < 2) || (message.reply_message && !message.reply_message.audio && !message.reply_message.video)) return await message.sendMessage(Lang.AVMIX_NEED_FILES);
+      if ((!message.reply_message && files.length < 2) || (message.reply_message && !message.reply_message.audio && !message.reply_message.video)) return await message.send(Lang.AVMIX_NEED_FILES);
       if (message.reply_message.audio) {
-          var savedFile = await saveMessage(message.reply_message);
+          var savedFile = await message.reply_message.download();
           await fs.writeFileSync('./temp/avmix/audio.mp3', fs.readFileSync(savedFile));
           return await message.sendReply(Lang.AVMIX_AUDIO_ADDED)
       }
       if (message.reply_message.video) {
-          var savedFile = await saveMessage(message.reply_message);
+          var savedFile = await message.reply_message.download();
           await fs.writeFileSync('./temp/avmix/video.mp4', fs.readFileSync(savedFile));
           return await message.sendReply(Lang.AVMIX_VIDEO_ADDED)
       }
-      AVmix('./temp/avmix/video.mp4', './temp/avmix/audio.mp3', './temp/avmix/mixed.mp4', async function(video) {
-          await message.sendMessage(video, 'video');
-          await fs.unlinkSync('./temp/avmix/video.mp4');
-          await fs.unlinkSync('./temp/avmix/audio.mp3');
-          await fs.unlinkSync('./temp/avmix/mixed.mp4');
-          return;
-      });
+      if (files.length>=2 || !message.reply_message){
+        let video = await avMix('./temp/avmix/video.mp4','./temp/avmix/audio.mp3')
+        await message.sendReply(video, 'video');
+        await fs.unlinkSync('./temp/avmix/video.mp4');
+        await fs.unlinkSync('./temp/avmix/audio.mp3');
+        await fs.unlinkSync('./merged.mp4');
+        return;
+    }
   });
   Module({
     pattern: "vmix ?(.*)",
@@ -123,7 +122,7 @@ const {
         fs.mkdirSync("./temp/vmix")
     }
     let files = fs.readdirSync("./temp/vmix/")
-    if ((!message.reply_message && files.length < 2) || (message.reply_message && !message.reply_message.video)) return await message.sendMessage("Give me videos");
+    if ((!message.reply_message && files.length < 2) || (message.reply_message && !message.reply_message.video)) return await message.send("Give me videos");
     if (message.reply_message.video && files.length == 1) {
         var savedFile = await message.reply_message.download();
         await fs.writeFileSync('./temp/vmix/video1.mp4', fs.readFileSync(savedFile));
@@ -156,7 +155,7 @@ const {
 }  
      if (files.length === 2){
       await message.sendReply("*Merging videos..*")
-      await message.sendMessage(await merge(['./temp/vmix/video1.mp4','./temp/vmix/video2.mp4'],'./temp','merged.mp4'), 'video');
+      await message.send(await merge(['./temp/vmix/video1.mp4','./temp/vmix/video2.mp4'],'./temp','merged.mp4'), 'video');
       await fs.unlinkSync('./temp/vmix/video1.mp4');
         await fs.unlinkSync('./temp/vmix/video2.mp4');
         return;  
@@ -169,7 +168,7 @@ const {
       use: 'edit'
   }, async (message, match) => {
       if (!message.reply_message || !message.reply_message.video) return await message.sendReply("*Reply to a video*");
-      var savedFile = await saveMessage(message.reply_message);
+      var savedFile = await message.reply_message.download();
       await message.sendReply("*Motion interpolating and rendering..*");
       ffmpeg(savedFile)
           .videoFilters('minterpolate=fps=120')
@@ -178,7 +177,7 @@ const {
           .format('mp4')
           .save('./temp/slowmo.mp4')
           .on('end', async () => {
-              return await message.sendMessage(fs.readFileSync('./temp/slowmo.mp4'), 'video')
+              return await message.send(fs.readFileSync('./temp/slowmo.mp4'), 'video')
           });
   });
  Module({
@@ -195,7 +194,7 @@ const {
       desc: "Video to gif with audio"
   }, async (message, match) => {
       if (!message.reply_message || !message.reply_message.video) return await message.sendReply("*Reply to a video*");
-      var savedFile = await saveMessage(message.reply_message);
+      var savedFile = await message.reply_message.download();
       await message.sendReply("*Rendering..*");
       ffmpeg(savedFile)
           .fps(13)
@@ -215,16 +214,16 @@ const {
       use: 'edit'
   }, async (message, match) => {
       if (!message.reply_message || !message.reply_message.video) return await message.sendReply("*Reply to a video*");
-      if (match[1] <= 10) return await message.sendMessage('*Low FPS Value ⚠️*\n*Minimun = 10*');
-      if (match[1] >= 500) return await message.sendMessage('*High FPS Value ⚠️*\n*Maximum = 500*')
-      var savedFile = await saveMessage(message.reply_message);
+      if (match[1] <= 10) return await message.send('*Low FPS Value ⚠️*\n*Minimun = 10*');
+      if (match[1] >= 500) return await message.send('*High FPS Value ⚠️*\n*Maximum = 500*')
+      var savedFile = await message.reply_message.download();
       await message.sendReply("*Motion interpolating and rendering..*");
       ffmpeg(savedFile)
           .videoFilters(`minterpolate=fps=${match[1]}:mi_mode=mci:me_mode=bidir`)
           .format('mp4')
           .save('./temp/interp.mp4')
           .on('end', async () => {
-              return await message.sendMessage(fs.readFileSync('./temp/interp.mp4'), 'video')
+              return await message.send(fs.readFileSync('./temp/interp.mp4'), 'video')
           });
   });
 Module({
@@ -235,8 +234,8 @@ Module({
       use: 'search'
   }, async (message, match) => {
       if (!message.reply_message || !message.reply_message.audio) return await message.sendReply("*Reply to a music*");
-      if (message.reply_message.duration > 60) return await message.sendMessage('*Audio too large! Use .trim command and cut the audio to < 60*');
-      var savedFile = await saveMessage(message.reply_message);
+      if (message.reply_message.duration > 60) return await message.send('*Audio too large! Use .trim command and cut the audio to < 60*');
+      var savedFile = await message.reply_message.download();
       try { var data = await findMusic(fs.readFileSync(savedFile)); } catch { return await message.sendReply("*No matching results found!*"); }
       try { var itest = data.title } catch { return await message.sendReply("*No matching results found!*"); }
       var templateButtons = [];
