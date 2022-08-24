@@ -25,8 +25,11 @@ const {
     Module
 } = require('../main')
 const {
-    ALLOWED
+    ALLOWED,
+    HANDLERS
 } = require('../config');
+var handler = HANDLERS !== 'false'? HANDLERS.split("")[0]:""
+
 function tConvert(time) {
   time = time.toString ().match (/^([01]\d|2[0-3])( )([0-5]\d)(:[0-5]\d)?$/) || [time];
  if (time.length > 1) { 
@@ -36,7 +39,7 @@ function tConvert(time) {
   }
   return time.join(''). replace(" ",":");
 }
-function _0x382a(){var _0x3db93d=['tri','149849zKwRGV','dat','ly_','66HpTTjC','mes','1875720bhgdyQ','Mes','toS','a25','fil','quo','509620UaZHqS','eSh','920xiRHkg','69578afGJoI','ssa','66260MonLFp','rMe','32418PZXmER','3132910GgAYfA','cke','sti','9dlcSyE'];_0x382a=function(){return _0x3db93d;};return _0x382a();}function _0x2ec8(_0x497237,_0x62844e){var _0x382a47=_0x382a();return _0x2ec8=function(_0x2ec8f4,_0x3281fa){_0x2ec8f4=_0x2ec8f4-0x8d;var _0x2bdceb=_0x382a47[_0x2ec8f4];return _0x2bdceb;},_0x2ec8(_0x497237,_0x62844e);}(function(_0x19eb1a,_0x513bca){var _0x426c4f=_0x2ec8,_0x2e2f43=_0x19eb1a();while(!![]){try{var _0x4d2d07=parseInt(_0x426c4f(0xa4))/0x1+parseInt(_0x426c4f(0x8f))/0x2*(parseInt(_0x426c4f(0x97))/0x3)+-parseInt(_0x426c4f(0x9e))/0x4+parseInt(_0x426c4f(0x91))/0x5+-parseInt(_0x426c4f(0x9c))/0x6*(-parseInt(_0x426c4f(0x99))/0x7)+parseInt(_0x426c4f(0x8e))/0x8*(-parseInt(_0x426c4f(0x93))/0x9)+parseInt(_0x426c4f(0x94))/0xa;if(_0x4d2d07===_0x513bca)break;else _0x2e2f43['push'](_0x2e2f43['shift']());}catch(_0x306a27){_0x2e2f43['push'](_0x2e2f43['shift']());}}}(_0x382a,0x477ef));async function extractData(_0x598d74){var _0x12b695=_0x2ec8;return _0x598d74['rep'+_0x12b695(0x9b)+_0x12b695(0x9d)+'sag'+'e'][_0x12b695(0x9a)+'a'][_0x12b695(0xa3)+'ted'+_0x12b695(0x9f)+'sag'+'e'][_0x12b695(0x96)+_0x12b695(0x95)+_0x12b695(0x92)+_0x12b695(0x90)+'ge'][_0x12b695(0xa2)+_0x12b695(0x8d)+_0x12b695(0xa1)+'6'][_0x12b695(0xa0)+_0x12b695(0x98)+'ng']();};
+function _0x382a(){var _0x3db93d=['tri','149849zKwRGV','dat','ly_','66HpTTjC','mes','1875720bhgdyQ','Mes','toS','a25','fil','quo','509620UaZHqS','eSh','920xiRHkg','69578afGJoI','ssa','66260MonLFp','rMe','32418PZXmER','3132910GgAYfA','cke','sti','9dlcSyE'];_0x382a=function(){return _0x3db93d;};return _0x382a();}function _0x2ec8(_0x497237,_0x62844e){var _0x382a47=_0x382a();return _0x2ec8=function(_0x2ec8f4,_0x3281fa){_0x2ec8f4=_0x2ec8f4-0x8d;var _0x2bdceb=_0x382a47[_0x2ec8f4];return _0x2bdceb;},_0x2ec8(_0x497237,_0x62844e);}(function(_0x19eb1a,_0x513bca){var _0x426c4f=_0x2ec8,_0x2e2f43=_0x19eb1a();while(!![]){try{var _0x4d2d07=parseInt(_0x426c4f(0xa4))/0x1+parseInt(_0x426c4f(0x8f))/0x2*(parseInt(_0x426c4f(0x97))/0x3)+-parseInt(_0x426c4f(0x9e))/0x4+parseInt(_0x426c4f(0x91))/0x5+-parseInt(_0x426c4f(0x9c))/0x6*(-parseInt(_0x426c4f(0x99))/0x7)+parseInt(_0x426c4f(0x8e))/0x8*(-parseInt(_0x426c4f(0x93))/0x9)+parseInt(_0x426c4f(0x94))/0xa;if(_0x4d2d07===_0x513bca)break;else _0x2e2f43['push'](_0x2e2f43['shift']());}catch(_0x306a27){_0x2e2f43['push'](_0x2e2f43['shift']());}}}(_0x382a,0x477ef));async function extractData(_0x598d74){var _0x12b695=_0x2ec8;return _0x598d74['quoted'].message[_0x12b695(0x96)+_0x12b695(0x95)+_0x12b695(0x92)+_0x12b695(0x90)+'ge'][_0x12b695(0xa2)+_0x12b695(0x8d)+_0x12b695(0xa1)+'6'][_0x12b695(0xa0)+_0x12b695(0x98)+'ng']();};
 Module({
     pattern: "stickcmd ?(.*)",
     fromMe: true,
@@ -64,7 +67,7 @@ if (message.reply_message && message.reply_message.sticker){
         if (delete_again) return await message.sendReply(`_Removed ${match[1]} from sticked commands!_`)
         if (delete_again === false) return await message.sendReply("_No such sticker/command found!_")
     }
-    if (deleted && !match[1]) return await message.sendMessage("_No such sticker found!_");
+    if (deleted && !match[1]) return await message.send("_No such sticker found!_");
 }
 else if (match[1] && !message.reply_message) {
 let deleted = await unstickCmd(match[1])
@@ -98,7 +101,7 @@ return await message.sendReply("*Automute has been disabled in this group ❗*")
 var mregex = /[0-2][0-9] [0-5][0-9]/
 if (mregex.test(match[1]) === false) return await message.sendReply("*Wrong format!\n.automute 22 00 (For 10 PM)\n.automute 06 00 (For 6 AM)*");
 var admin = await isAdmin(message)
-if (!admin) return await message.sendReply("*I'm not admin*");
+if (!admin) return await message.sendReply("_I'm not admin_");
 await setAutoMute(message.jid,match[1]);
 await message.sendReply(`*Group will automatically mute at ${tConvert(match[1])}. Reconnecting..*`)
 process.exit(0)
@@ -147,71 +150,63 @@ if (!msg) return await message.sendReply("_No mutes/unmutes found!_")
 message.sendReply("*Scheduled Mutes/Unmutes*\n\n"+msg)
 });
 Module({
-    pattern: "antifake",
+    pattern: "antifake ?(.*)",
     fromMe: true,
     use: 'group'
 }, async (message, match) => {
 var admin = await isAdmin(message)
-if (!admin) return await message.sendReply("*I'm not admin*");
+if (!admin) return await message.sendReply("_I'm not admin!_");
+if (match[1] === "on"){
+    await setAntifake(message.jid);
+    return await message.sendReply("_Antifake enabled!_")
+}
+if (match[1] === "off"){
+    await delAntifake(message.jid);
+    return await message.sendReply("_Antifake disabled!_")
+}
 var {
-        subject,
-        owner
-    } = await message.client.groupMetadata(message.jid)
-    var myid = message.client.user.id.split(":")[0]
-    owner = owner || myid + "@s.whatsapp.net"
-    const templateButtons = [{
-            index: 1,
-            urlButton: {
-                displayText: 'WIKI',
-                url: 'https://github.com/souravkl11/raganork-md/wiki/Docs'
-            }
-        },
-        {
-            index: 2,
-            quickReplyButton: {
-                displayText: 'ENABLE',
-                id: 'fake_on' + myid
-            }
-        },
-        {
-            index: 3,
-            quickReplyButton: {
-                displayText: 'DISABLE',
-                id: 'fake_off' + myid
-            }
-        },
-        {
-            index: 4,
-            quickReplyButton: {
-                displayText: 'ALLOWED PREFIXES',
-                id: 'fake_get' + myid
-            }
-        },
-    ]
+    subject,
+    owner
+} = await message.client.groupMetadata(message.jid)
+var myid = message.client.user.id.split(":")[0]
+owner = owner || myid + "@s.whatsapp.net"
+const templateButtons = [{
+        index: 1,
+        urlButton: {
+            displayText: 'WIKI',
+            url: 'https://github.com/souravkl11/raganork-md/wiki/Antifake'
+        }
+    },
+    {
+        index: 2,
+        quickReplyButton: {
+            displayText: 'ON',
+            id: handler+'antifake on'
+        }
+    },
+    {
+        index: 3,
+        quickReplyButton: {
+            displayText: 'OFF',
+            id: handler+'antifake off'
+        }
+    },
+    {
+        index: 4,
+        quickReplyButton: {
+            displayText: 'ALLOWED PREFIXES',
+            id: handler+'getvar ALLOWED'
+        }
+    },
+]
 
-    const templateMessage = {
-        text: "*Antifake menu of* " + subject,
-        footer: '',
-        templateButtons: templateButtons
-    }
-    await message.client.sendMessage(message.jid, templateMessage)
-})
-Module({
-    on: "button",
-    fromMe: true
-}, async (message, match) => {
-    if (message.button && message.button.startsWith("fake_on") && message.button.includes(message.client.user.id.split(":")[0])) {
-        await setAntifake(message.jid);
-        return await message.sendMessage("Antifake enabled ✅")
-    }
-    if (message.button && message.button.startsWith("fake_off") && message.button.includes(message.client.user.id.split(":")[0])) {
-        await delAntifake(message.jid);
-        return await message.sendMessage("Antifake disabled ✅")
-    }
-    if (message.button && message.button.startsWith("fake_get") && message.button.includes(message.client.user.id.split(":")[0])) {
-        return await message.sendMessage("Allowed prefixes: " + ALLOWED)
-    }
-})
+const templateMessage = {
+    text: "*Antifake menu of* " + subject,
+    footer: '',
+    templateButtons: templateButtons
+}
+await message.client.sendMessage(message.jid, templateMessage)
+    })
 Module({
     on: "group_update",
     fromMe: false
@@ -221,15 +216,15 @@ Module({
     db.map(data => {
         jids.push(data.jid)
     });
-    if (message.update === 27 && jids.includes(message.jid)) {
+    if (message.update === 'add' && jids.includes(message.jid)) {
         var allowed = ALLOWED.split(",");
         if (isFake(message.participant[0], allowed)) {
             var admin = await isAdmin(message);
             if (!admin) return;
-            await message.client.sendMessage(message.jid, {
+            /*await message.client.sendMessage(message.jid, {
                 text: "*Country code not allowed* @" + message.participant[0].split("@")[0],
                 mentions: [message.participant[0]]
-            });
+            });*/
             return await message.client.groupParticipantsUpdate(message.jid, [message.participant[0]], "remove")
         }
     }
